@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.msm.dao.MSMOperateInfoDAO">
+	<select id="selectMSMOperateInfoByStoreId" resultType="com.platfos.pongift.data.msm.model.MSMOperateInfo">
+		SELECT *
+		FROM msm_operate_info_tb
+		WHERE store_id = #{storeId}
+	</select>
+
+	<insert id="insertMSMOperateInfos" parameterType="java.util.List">
+		INSERT INTO msm_operate_info_tb (operate_id, store_id, day_gb, time_tp, opening_tm, ending_tm, reg_date)
+		VALUES
+		<foreach collection="list" item="item" index="index" open="(" separator="),(" close=")">
+			CONCAT('ON',SUBSTRING(sysdate()+0, 3, 6), lpad(sim_seq_reg01_fc('ON'), 6, 0)), #{item.storeId}, #{item.dayGb}, #{item.timeTp}, #{item.openingTm}, #{item.endingTm}, now()
+		</foreach>
+	</insert>
+
+	<delete id="deleteMSMOperateInfoByStoreId">
+		DELETE FROM msm_operate_info_tb
+		WHERE store_id = #{storeId}
+	</delete>
+</mapper>

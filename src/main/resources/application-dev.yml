@@ -1,0 +1,91 @@
+platfos:
+  server-name: DEV-API-SERVER
+  system-mode: '02'
+  accessible: [
+      211.219.111.93,
+      211.192.5.56,
+      218.51.205.137,
+      218.51.205.138,
+      14.52.184.198,
+      121.160.164.223,
+      211.187.14.94,
+      112.169.19.40,
+      223.38.21.36,
+      219.254.222.234,
+      59.15.145.175
+  ]
+  channels: [ 125.141.15.97, 211.192.5.56 ]
+  attach-upload-path: /home/user/pongift-api-server/upload
+  wideshot-mode: '01'
+  wideshot-read-timeout: '30000'
+  wideshot-result-time-over: '600'
+  api-doc: /home/user/pongift-api-server/doc/api-doc.html
+  cors: [
+    {
+      origins: [ '*' ],
+      path: /**
+    }
+  ]
+  rest-template-connection-timeout: '1000'
+  rest-template-max-connection-per-route: '20'
+  rest-template-read-timeout: '30000'
+  rest-template-max-connection-count: '200'
+  default-language: KO
+logging:
+  level:
+    com:
+      platfos:
+        pongift:
+          category:
+            dao: DEBUG
+          data:
+            sim:
+              dao:
+                SIMIndexDAO: INFO
+            nodeValue: DEBUG
+            ssm:
+              dao: DEBUG
+          goods:
+            dao: DEBUG
+          exception: DEBUG
+          store:
+            dao: DEBUG
+          authorization: DEBUG
+    org:
+      mariadb:
+        jdbc: DEBUG
+  file:
+    name: /home/user/pongift-api-server/logs/pongift-api-server-tb.log
+    max-history: 31
+    max-size: 500MB
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: 'true'
+spring:
+  servlet:
+    multipart:
+      enabled: 'true'
+      max-request-size: 100MB
+      max-file-size: 5MB
+      file-size-threshold: 1MB
+      location: /home/user/pongift-api-server/uploadTemp
+  datasource:
+    password: pongift001
+    url: jdbc:mariadb://tb.pongift.com:8806/pongift20?autoReconnect=true&noAccessToProcedureBodies=true&useSSL=false&allowMultiQueries=true&serverTimezone=UTC&characterEncoding=utf8
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: pongift20
+  task:
+    execution:
+      pool:
+        max-size: '10'
+  jackson:
+    date-format: yyyyMMddHHmmss
+  cache:
+    jcache:
+      config: classpath:config/ehcache.xml
+server:
+  ssl:
+    enabled: 'false'
+  port: '914'

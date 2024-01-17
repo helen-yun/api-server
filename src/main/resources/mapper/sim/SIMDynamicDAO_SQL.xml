@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMDynamicDAO">
+	<select id="selectPrimaryKeyColumnNameByTableName" resultType="hashmap">
+		SELECT info.table_name tbl, info.column_name col
+		FROM information_schema.key_column_usage info
+		WHERE info.table_name=#{tableName}
+		AND info.table_schema = schema()
+		AND info.constraint_name = 'PRIMARY'
+	</select>
+	<select id="countByTableNameAndColumn" resultType="int">
+		SELECT count(*) cnt
+		FROM ${tableName}
+		WHERE ${columnName} = #{columnValue}
+	</select>
+	<select id="selectByTableNameAndColumnAndSelectColumnName" resultType="hashmap">
+		SELECT ${selectColumnName}
+		FROM ${tableName}
+		WHERE ${columnName} = #{columnValue}
+	</select>
+	<select id="selectHierarchicalInfo" resultType="hashmap">
+		SELECT
+		CONCAT(
+		<foreach collection="levels" index="index" separator=", ">
+			(if(LENGTH(IFNULL(p${levels.length - index}.${parentColumnName}, '')) = 0, '', CONCAT(p${levels.length - index}.${parentColumnName}, #{separator})))
+		</foreach>
+			, p1.${columnName}
+		) path
+		,
+		SUM(
+		<foreach collection="levels" index="index">
+			(if(LENGTH(IFNULL(p${levels.length - index}.${parentColumnName}, '')) = 0, 0, 1)) +
+		</foreach>
+			1
+		) level
+		<foreach collection="levels" index="index" separator=" ">
+			<choose>
+				<when test="index != 0">
+		INNER JOIN ${tableName} as p${(index+1)} ON p${(index+1)}.${columnName} = p${index}.${parentColumnName}
+				</when>
+				<otherwise>
+		FROM ${tableName} as p${(index+1)}
+				</otherwise>
+			</choose>
+		</foreach>
+		WHERE p1.${columnName}=#{columnValue}
+	</select>
+	<select id="selectReverseHierarchicalPaths" resultType="hashmap">
+	SELECT A.*, (CHAR_LENGTH(path) - CHAR_LENGTH(REPLACE(path, #{separator}, SPACE(LENGTH(#{separator})-1)))+1) AS level, SUBSTRING_INDEX(path, #{separator}, -1) AS leaf
+	FROM (
+		SELECT
+		CONCAT(
+		<foreach collection="levels" index="index" separator=", ">
+			<choose>
+				<when test="index != 0">
+			(if(LENGTH(IFNULL(t${index+1}.${columnName}, '')) = 0, '', CONCAT(#{separator}, t${index+1}.${columnName})))
+				</when>
+				<otherwise>
+			t${index+1}.${columnName}
+				</otherwise>
+			</choose>
+		</foreach>
+		) path
+		<foreach collection="levels" index="index" separator=" ">
+			<choose>
+				<when test="index != 0">
+					INNER JOIN ${tableName} as t${(index+1)} ON t${(index+1)}.${parentColumnName} = t${index}.${columnName}
+				</when>
+				<otherwise>
+					FROM ${tableName} as t${(index+1)}
+				</otherwise>
+			</choose>
+		</foreach>
+		<choose>
+			<when test="columnValue != null and columnValue.length > 0">
+				WHERE t1.${columnName}=#{columnValue}
+			</when>
+			<otherwise>
+				WHERE LENGTH(IFNULL(t0.${parentColumnName}, '')) = 0
+			</otherwise>
+		</choose>
+	) A
+	</select>
+</mapper>

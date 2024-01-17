@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.msm.dao.MSMStoreDAO">
+	<sql id="select_store">
+			     store.*, merchant.merchant_nm, service.service_nm, service.service_st
+			   , CASE WHEN file1.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file1.file_path, file1.store_nm) END store_image1
+			   , CASE WHEN file2.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file2.file_path, file2.store_nm) END store_image2
+			   , CASE WHEN file3.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file3.file_path, file3.store_nm) END store_image3
+	</sql>
+	<sql id="join_store">
+		JOIN sim_system_info_tb cdn
+		ON cdn.access_fl=#{accessFl}
+		AND cdn.apply_key='cdn.server.host'
+		JOIN mim_service_list_tb service
+		ON ${alias}.service_id = service.service_id
+		JOIN mim_merchant_list_tb merchant
+		ON service.merchant_id = merchant.merchant_id
+		LEFT OUTER JOIN sim_attach_file_tb file1
+		ON ${alias}.store_id = file1.linked_id
+		AND file1.maintain_gb = '02'
+		AND file1.file_gb = '01'
+		LEFT OUTER JOIN sim_attach_file_tb file2
+		ON ${alias}.store_id = file2.linked_id
+		AND file2.maintain_gb = '02'
+		AND file2.file_gb = '02'
+		LEFT OUTER JOIN sim_attach_file_tb file3
+		ON ${alias}.store_id = file3.linked_id
+		AND file3.maintain_gb = '02'
+		AND file3.file_gb = '03'
+	</sql>
+
+	<select id="selectMSMStore" resultType="com.platfos.pongift.data.msm.model.MSMStore">
+		SELECT
+		<include refid="select_store"/>
+		FROM msm_store_list_tb store
+		<include refid="join_store"><property name="alias" value="store"/></include>
+		WHERE store.store_id = #{storeId}
+	</select>
+
+	<insert id="insertMSMStore" parameterType="com.platfos.pongift.data.msm.model.MSMStore">
+		INSERT INTO msm_store_list_tb
+		(
+			store_id, service_id, store_nm
+		   , zip_cd, store_address1, store_address2
+		   , store_tel, report_tp, offering_service
+		   , search_way, approval_st
+		   , approval_dt
+		   , use_fl
+		   , reg_date
+	    ) VALUES (
+	    	#{storeId}, #{serviceId}, #{storeNm}
+	    	, #{zipCd}, #{storeAddress1}, #{storeAddress2}
+	    	, #{storeTel}, #{reportTp}, #{offeringService}
+	    	, #{searchWay}, #{approvalSt}
+	    	, DATE_FORMAT(NOW(), '%Y%m%d')
+	    	, 'Y'
+	    	, now()
+	    )
+	</insert>
+
+	<update id="updateMSMStore" parameterType="com.platfos.pongift.data.msm.model.MSMStore">
+		UPDATE msm_store_list_tb
+		SET store_nm = #{storeNm}, zip_cd = #{zipCd}, store_address1 = #{storeAddress1}, store_address2 = #{storeAddress2}, store_tel = #{storeTel}, report_tp = #{reportTp}, offering_service = #{offeringService}
+		  , search_way = #{searchWay}
+		  , mod_date = now()
+		WHERE store_id = #{storeId}
+	</update>
+</mapper>

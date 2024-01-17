@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.pom.dao.POMCustomerInfoDAO">
+	<select id="selectPOMCustomerInfoByProductId" resultType="com.platfos.pongift.data.pom.model.POMCustomerInfo">
+		SELECT *
+		FROM pom_customer_info_tb
+		WHERE product_id = #{productId}
+	</select>
+    <insert id="insertPOMCustomerInfo" parameterType="com.platfos.pongift.data.pom.model.POMCustomerInfo">
+		INSERT INTO pom_customer_info_tb
+		(
+			customer_id, product_id, user_id
+			, buyer_nm, buyer_phone, buyer_id
+			, receiver_nm, receiver_phone, receiver_id, certify_no, reg_date
+	    ) VALUES (
+	    	#{customerId}, #{productId}, #{userId}
+	    	, #{buyerNm}, #{buyerPhone}, #{buyerId}
+	    	, #{receiverNm}, #{receiverPhone}, #{receiverId}, #{certifyNo}, now()
+	    )
+	</insert>
+	<update id="updatePOMCustomerInfo">
+		UPDATE pom_customer_info_tb
+		SET reg_date = reg_date
+		<if test="buyerNm != null"> , buyer_nm = #{buyerNm}</if>
+		<if test="buyerPhone != null"> , buyer_phone = #{buyerPhone}</if>
+		<if test="receiverNm != null"> , receiver_nm = #{receiverNm}</if>
+		<if test="receiverPhone != null"> , receiver_phone = #{receiverPhone}</if>
+		WHERE customer_id = #{customerId}
+	</update>
+</mapper>

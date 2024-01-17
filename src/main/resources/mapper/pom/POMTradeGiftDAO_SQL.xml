@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.pom.dao.POMTradeGiftDAO">
+    <insert id="insertPOMTradeGift" parameterType="com.platfos.pongift.data.pom.model.POMTradeGift">
+		INSERT INTO pom_trade_gift_tb
+		(
+			product_id, trade_id, ledger_id
+			, goods_tp, goods_nm, goods_price, discount_price, reg_date
+	    ) VALUES (
+	    	#{productId}, #{tradeId}, #{ledgerId}
+	    	, #{goodsTp}, #{goodsNm}, #{goodsPrice}, #{discountPrice}, now()
+	    )
+	</insert>
+    <select id="selectPOMTradeGift" resultType="com.platfos.pongift.data.pom.model.POMTradeGift">
+        SELECT *
+        FROM pom_trade_gift_tb
+        WHERE 1 = 1
+        <if test="productId !=null and productId !=''">
+            AND product_id = #{productId}
+        </if>
+    </select>
+    <select id="selectPOMTradeGiftByLedgerIdAndTradeTp" resultType="com.platfos.pongift.data.pom.model.POMTradeGift">
+		SELECT gift.*
+		FROM cim_ledger_list_tb ledger
+		INNER JOIN pom_trade_gift_tb gift
+		ON ledger.ledger_id = gift.ledger_id
+		INNER JOIN pom_trade_list_tb trade
+		ON gift.trade_id = trade.trade_id
+		AND trade.trade_tp = #{tradeTp}
+		WHERE ledger.ledger_id = #{ledgerId}
+		ORDER BY trade.reg_date DESC
+		LIMIT 1
+	</select>
+</mapper>

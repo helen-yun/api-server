@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMIndexDAO">
+	<select id="callIndexReg01Sp" statementType="CALLABLE" parameterType="hashmap">
+    {
+         call sim_index_reg01_sp
+         (
+              #{P_PK_CD,mode=IN,jdbcType=CHAR}
+            , #{P_TABLE_PK,mode=OUT,jdbcType=VARCHAR}
+            , #{P_RESULT_CODE,mode=OUT,jdbcType=VARCHAR}
+            , #{P_RESULT_MSG,mode=OUT,jdbcType=VARCHAR}
+         )
+    }
+	</select>
+    <select id="callGiftCardReg01Sp" statementType="CALLABLE" parameterType="hashmap">
+    {
+         call sim_gift_card_reg01_sp
+         (
+              #{PIN_RANDOM_NO,mode=IN,jdbcType=CHAR}
+            , #{PIN_TYPE_GB,mode=IN,jdbcType=CHAR}
+            , #{P_PIN_NO,mode=OUT,jdbcType=VARCHAR}
+            , #{P_RESULT_CODE,mode=OUT,jdbcType=VARCHAR}
+            , #{P_RESULT_MSG,mode=OUT,jdbcType=VARCHAR}
+         )
+    }
+	</select>
+</mapper>

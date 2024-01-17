@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMTransmitInfoDAO">
+	<select id="selectSIMTransmitInfo" resultType="com.platfos.pongift.data.sim.model.SIMTransmitInfo">
+		SELECT *, (TIMESTAMPDIFF(SECOND, reg_date, NOW())>#{timeOver}) time_over
+		FROM sim_transmit_info_tb
+		WHERE transmit_id = #{transmitId}
+	</select>
+
+	<select id="selectSIMTransmitForAlimTalk" resultType="com.platfos.pongift.data.sim.model.SIMTransmitForAlimTalk">
+        SELECT ledger.ledger_id
+             , trans.dispatch_id
+             , dispatch.product_id
+             , dispatch.send_gb
+             , trade_gift.trade_id
+             , trade_gift.goods_nm
+             , trade.trade_tp
+             , ledger.expiry_dt
+             , CONCAT(trade.order_dt, trade.order_tm) purchase_dt
+             , ledger.gift_amt
+             , goods.goods_info
+             , channelInfo.channel_gb
+             , customer.buyer_nm
+             , customer.buyer_phone
+             , customer.receiver_nm
+             , customer.receiver_phone
+        FROM sim_transmit_info_tb trans
+                 INNER JOIN pom_dispatch_info_tb dispatch
+                            ON trans.dispatch_id = dispatch.dispatch_id
+                 INNER JOIN pom_trade_gift_tb trade_gift
+                            ON dispatch.product_id = trade_gift.product_id
+                 INNER JOIN pom_trade_list_tb trade
+                            ON trade_gift.trade_id = trade.trade_id
+                                AND trade.trade_tp IN ('01', '09')
+                 INNER JOIN pom_customer_info_tb customer
+                            ON trade_gift.product_id = customer.product_id
+                 INNER JOIN mim_service_list_tb channel
+                            ON channel.service_id = trade.service_id
+                 INNER JOIN mim_channel_list_tb channelInfo
+                            ON channelInfo.service_id = channel.service_id
+                 INNER JOIN cim_ledger_list_tb ledger
+                            ON trade_gift.ledger_id = ledger.ledger_id
+                 LEFT JOIN ssm_goods_info_tb goods
+                           ON goods.goods_id = trade.goods_id
+                 JOIN sim_system_info_tb cdn
+                      ON cdn.access_fl = #{accessFl}
+                          AND cdn.apply_key = 'cdn.server.host'
+        WHERE trans.transmit_id = #{transmitId}
+    </select>
+
+    <select id="selectGoodsSupplyInfoByAlimTalk" resultType="com.platfos.pongift.data.sim.model.GoodsSupplyInfoForAlimTalk">
+        SELECT supply.service_nm
+        , goods.exchange_place
+        , supply.center_tel
+        , goods.goods_info
+        FROM pom_trade_list_tb trade
+        <choose>
+            <when test="tradeTp eq '09'">
+                INNER JOIN ssm_goods_info_tb goods
+                ON goods.goods_id = trade.goods_id
+            </when>
+            <otherwise>
+                INNER JOIN gim_goods_list_tb goods
+                ON goods.goods_id = trade.goods_id
+            </otherwise>
+        </choose>
+        INNER JOIN mim_service_list_tb supply
+        ON supply.service_id = goods.service_id
+        WHERE trade.trade_id = #{tradeId}
+    </select>
+
+	<insert id="insertSIMTransmitInfo" parameterType="com.platfos.pongift.data.sim.model.SIMTransmitInfo">
+		INSERT INTO sim_transmit_info_tb
+		(
+			transmit_id, dispatch_id, template_id
+			, request_cd, result_cd, send_tp, send_st, send_dt, inquiry_cnt
+			, reg_date
+	    ) VALUES (
+	    	#{transmitId}, #{dispatchId}, #{templateId}
+	    	, #{requestCd}, #{resultCd}, #{sendTp}, #{sendSt}, DATE_FORMAT(now(), '%Y%m%d'), #{inquiryCnt}
+	    	, now()
+	    )
+	</insert>
+	<update id="updateSIMTransmitInfo" parameterType="com.platfos.pongift.data.sim.model.SIMTransmitInfo">
+		UPDATE sim_transmit_info_tb
+		SET result_cd = #{resultCd}, send_st = #{sendSt}, inquiry_cnt = #{inquiryCnt}
+		WHERE transmit_id = #{transmitId}
+	</update>
+</mapper>

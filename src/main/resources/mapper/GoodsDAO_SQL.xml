@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.goods.dao.GoodsDAO">
+	<sql id="select_goods">
+			     goods.*
+			   , CASE WHEN file1.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file1.file_path, file1.store_nm) END goods_image
+			   , CASE WHEN file2.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file2.file_path, file2.store_nm) END goods_detail_image
+	</sql>
+	<sql id="join_goods">
+		JOIN sim_system_info_tb cdn
+		ON cdn.access_fl=#{accessFl}
+		AND cdn.apply_key='cdn.server.host'
+		<if test="agencyId != null">
+		INNER JOIN msm_store_list_tb store
+		ON ${alias}.store_id = store.store_id
+		INNER JOIN mim_service_list_tb service
+		ON store.service_id = service.service_id
+		AND service.agency_fl='Y'
+		AND service.agency_id=#{agencyId}
+		</if>
+		LEFT OUTER JOIN sim_attach_file_tb file1
+		ON ${alias}.goods_id = file1.linked_id
+		AND file1.maintain_gb = '01'
+		AND file1.file_gb = '01'
+		LEFT OUTER JOIN sim_attach_file_tb file2
+		ON ${alias}.goods_id = file2.linked_id
+		AND file2.maintain_gb = '01'
+		AND file2.file_gb = '02'
+		LEFT OUTER JOIN sim_attach_file_tb file3
+		ON ${alias}.goods_id = file3.linked_id
+		AND file3.maintain_gb = '01'
+		AND file3.file_gb = '03'
+		LEFT OUTER JOIN sim_attach_file_tb file4
+		ON ${alias}.goods_id = file4.linked_id
+		AND file4.maintain_gb = '01'
+		AND file4.file_gb = '04'
+	</sql>
+	<sql id="condition_goods">
+		<if test="storeId != null">
+			AND ${alias}.store_id = #{storeId}
+		</if>
+		<if test="goodsCategory != null">
+			AND ${alias}.goods_category = #{goodsCategory}
+		</if>
+		<if test="exhibitSt != null">
+			AND ${alias}.exhibit_st = #{exhibitSt}
+		</if>
+		<if test="approvalSt != null">
+			AND ${alias}.approval_st = #{approvalSt}
+		</if>
+		<if test="processSt != null">
+			AND IF((${alias}.process_st='' OR ${alias}.process_st IS NULL), '01', ${alias}.process_st)  = #{processSt}
+		</if>
+		<if test="keywordGoodsNm != null">
+			AND ${alias}.goods_nm like CONCAT('%',#{keywordGoodsNm},'%')
+		</if>
+	</sql>
+
+	<select id="selectGoodsListTotalPage" parameterType="com.platfos.pongift.goods.model.GoodsSearchCondition" resultType="int">
+		SELECT CEILING(COUNT(goods.goods_id)/#{pageSize}) AS total_page_cnt
+		FROM gim_goods_list_tb goods
+		<include refid="join_goods"><property name="alias" value="goods"/></include>
+		WHERE 1 = 1
+		<include refid="condition_goods"><property name="alias" value="goods"/></include>
+	</select>
+
+	<select id="selectGoodsList" parameterType="com.platfos.pongift.goods.model.GoodsSearchCondition" resultType="com.platfos.pongift.goods.model.Goods">
+		SELECT
+		<include refid="select_goods"/>
+		FROM gim_goods_list_tb goods
+		<include refid="join_goods"><property name="alias" value="goods"/></include>
+		WHERE 1 = 1
+		<include refid="condition_goods"><property name="alias" value="goods"/></include>
+		<choose>
+			<when test="orderCd eq '01'">
+				ORDER BY goods.reg_date
+			</when>
+			<when test="orderCd eq '02'">
+				ORDER BY goods.goods_nm
+			</when>
+			<when test="orderCd eq '03'">
+				ORDER BY goods.sale_price
+			</when>
+			<when test="orderCd eq '04'">
+				ORDER BY goods.sale_price desc
+			</when>
+			<otherwise>
+				ORDER BY goods.reg_date desc
+			</otherwise>
+		</choose>
+		<if test="page != null and pageSize != null">
+			LIMIT #{page}, #{pageSize}
+		</if>
+	</select>
+
+	<select id="selectGoodsByAgencyIdAndGoodsId" resultType="com.platfos.pongift.goods.model.Goods">
+		SELECT
+		<include refid="select_goods"/>
+		FROM gim_goods_list_tb goods
+		<include refid="join_goods"><property name="alias" value="goods"/></include>
+		WHERE goods.goods_id = #{goodsId}
+	</select>
+	<select id="selectGoodsByLedgerId" resultType="com.platfos.pongift.goods.model.Goods">
+		SELECT
+		<include refid="select_goods"/>
+		FROM cim_ledger_list_tb ledger
+		INNER JOIN pom_trade_gift_tb gift
+		ON ledger.ledger_id = gift.ledger_id
+		INNER JOIN pom_trade_list_tb trade
+		ON gift.trade_id = trade.trade_id
+		AND trade.trade_tp = #{tradeTp}
+		<choose>
+			<when test="tradeTp == '09'">
+				INNER JOIN ssm_goods_info_tb goods
+				ON trade.goods_id = goods.goods_id
+			</when>
+			<otherwise>
+				INNER JOIN gim_goods_list_tb goods
+				ON trade.goods_id = goods.goods_id
+			</otherwise>
+		</choose>
+		<include refid="join_goods"><property name="alias" value="goods"/></include>
+		WHERE ledger.ledger_id = #{ledgerId}
+	</select>
+	<select id="countGoodsIdAndStoreId" resultType="long">
+		SELECT COUNT(*)
+		FROM gim_goods_list_tb
+		WHERE goods_id = #{goodsId}
+		AND store_id = #{storeId}
+	</select>
+</mapper>

@@ -1,0 +1,88 @@
+platfos:
+  server-name: PRD-API-SERVER
+  system-mode: '01'
+  accessible: [
+      221.150.25.32,
+      52.78.136.154,
+      10.10.16.130,
+      10.10.10.87,
+      10.10.10.128,
+      10.10.13.240,
+      219.254.222.234,
+      10.10.14.147,
+      59.15.145.175
+  ]
+  channels: [ 52.78.136.154, 10.10.12.128, 10.10.13.104 ]
+  ips: [ 10.10.12.18, 10.10.13.240, 52.78.136.154 ]
+  wideshot-mode: '01'
+  wideshot-read-timeout: '30000'
+  wideshot-result-time-over: '600'
+  api-doc: /home/centos/pongift-api-server/doc/api-doc.html
+  cors: [
+    {
+      origins: [ '*' ],
+      path: /**
+    }
+  ]
+  rest-template-connection-timeout: '1000'
+  rest-template-max-connection-per-route: '20'
+  rest-template-read-timeout: '30000'
+  rest-template-max-connection-count: '200'
+  default-language: KO
+logging:
+  level:
+    com:
+      platfos:
+        pongift:
+          category:
+            dao: DEBUG
+          data:
+            sim:
+              dao:
+                SIMIndexDAO: INFO
+            nodeValue: DEBUG
+            ssm:
+              dao: DEBUG
+          goods:
+            dao: DEBUG
+          exception: DEBUG
+          store:
+            dao: DEBUG
+          authorization: DEBUG
+    org:
+      mariadb:
+        jdbc: DEBUG
+  file:
+    name: /home/centos/pongift-api-server/logs/pongift-api-server-1.log
+    max-history: 999
+    max-size: 500MB
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: 'true'
+spring:
+  servlet:
+    multipart:
+      enabled: 'true'
+      max-request-size: 100MB
+      max-file-size: 5MB
+      file-size-threshold: 1MB
+  datasource:
+    password: pongift001
+    url: jdbc:mariadb://pongiftplus-prod-mariadb.ca9h19s6ha39.ap-northeast-2.rds.amazonaws.com:8806/pongift20?autoReconnect=true&noAccessToProcedureBodies=true&useSSL=false&allowMultiQueries=true&serverTimezone=UTC&characterEncoding=utf8
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: pongift20
+  task:
+    execution:
+      pool:
+        max-size: '10'
+  jackson:
+    date-format: yyyyMMddHHmmss
+  cache:
+    jcache:
+      config: classpath:config/ehcache.xml
+server:
+  ssl:
+    enabled: 'false'
+  port: '914'

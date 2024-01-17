@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.pom.dao.POMTradeDAO">
+    <select id="callTradeListReg01Sp" statementType="CALLABLE" parameterType="hashmap" resultType="hashmap">
+    {
+         call pom_trade_list_reg01_sp
+         (
+              #{P_SERVICE_ID,mode=IN,jdbcType=VARCHAR}
+            , #{P_STORE_ID,mode=IN,jdbcType=VARCHAR}
+            , #{P_GOODS_ID,mode=IN,jdbcType=VARCHAR}
+            , #{P_LEDGER_ID,mode=IN,jdbcType=VARCHAR}
+            , #{P_TRADE_TP,mode=IN,jdbcType=CHAR}
+            , #{P_ORDER_NO,mode=IN,jdbcType=VARCHAR}
+            , #{P_DETAIL_NO,mode=IN,jdbcType=VARCHAR}
+            , #{P_ORDER_AMT,mode=IN,jdbcType=INTEGER}
+            , #{P_ORDER_DT,mode=IN,jdbcType=CHAR}
+            , #{P_ORDER_TM,mode=IN,jdbcType=CHAR}
+            , #{P_ORDER_CNT,mode=IN,jdbcType=SMALLINT}
+            , #{P_PAYMENT_GB,mode=IN,jdbcType=CHAR}
+            , #{P_RESULT_CODE,mode=OUT,jdbcType=VARCHAR}
+            , #{P_RESULT_MSG,mode=OUT,jdbcType=VARCHAR}
+            , #{P_TRADE_ID,mode=OUT,jdbcType=VARCHAR}
+            , #{P_APPROVAL_NO,mode=OUT,jdbcType=VARCHAR}
+         )
+    }
+	</select>
+    <select id="selectPOMTrade" resultType="com.platfos.pongift.data.pom.model.POMTrade">
+		SELECT *
+		FROM pom_trade_list_tb
+		WHERE trade_id = #{tradeId}
+	</select>
+    <select id="createTradeSeqNo" parameterType="com.platfos.pongift.data.pom.model.POMTradeSeqNo" statementType="CALLABLE">
+		{CALL sim_trade_reg01_sp(#{inputCd,mode=IN,jdbcType=CHAR}, #{tradeSeqNo,mode=OUT,jdbcType=VARCHAR}, #{resultCode,mode=OUT,jdbcType=VARCHAR}, #{resultMsg,mode=OUT,jdbcType=VARCHAR})}
+  	</select>
+    <select id="countPOMTrade" parameterType="com.platfos.pongift.data.pom.model.POMTrade" resultType="int">
+        SELECT COUNT(*) cnt
+        FROM pom_trade_list_tb
+        WHERE 1 = 1
+        <if test="serviceId != null">
+            AND service_id = #{serviceId}
+        </if>
+        <if test="tradeTps != null">
+            AND trade_tp IN  <foreach item="item" index="index" collection="tradeTps"  open="(" separator="," close=")">#{item}</foreach>
+        </if>
+        <if test="orderNo != null">
+            AND order_no = #{orderNo}
+        </if>
+        <if test="detailNo != null">
+            AND detail_no = #{detailNo};
+        </if>
+    </select>
+</mapper>

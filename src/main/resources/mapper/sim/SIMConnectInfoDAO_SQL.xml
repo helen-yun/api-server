@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMConnectInfoDAO">
+	<select id="selectSIMConnectInfoListByAccessIp" resultType="com.platfos.pongift.data.sim.model.SIMConnectInfo">
+		SELECT a.connect_id, a.service_id, a.store_id, a.access_fl, a.access_ip, a.reg_date, a.reg_id, a.mod_date, a.mod_id, b.service_st, b.service_tp
+		FROM sim_connect_info_tb a, mim_service_list_tb b
+		WHERE a.service_id = b.service_id
+		AND a.access_ip=#{accessIp}
+		AND b.service_st='02'
+	</select>
+	<select id="selectSIMConnectInfoListByServiceIdAndAccessIp" resultType="com.platfos.pongift.data.sim.model.SIMConnectInfo">
+		SELECT a.connect_id, a.service_id, a.store_id, a.access_fl, a.access_ip, a.reg_date, a.reg_id, a.mod_date, a.mod_id, b.service_st, b.service_tp, c.service_tp AS subServiceTp
+		FROM sim_connect_info_tb a, mim_service_list_tb b
+		LEFT OUTER JOIN mim_service_role_tb c
+		ON b.service_id = c.service_id
+		WHERE a.service_id = b.service_id
+		AND a.service_id=#{serviceId}
+		AND a.access_ip=#{accessIp}
+		AND b.service_st='02'
+	</select>
+</mapper>

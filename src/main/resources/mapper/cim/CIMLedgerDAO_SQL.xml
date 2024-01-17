@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.cim.dao.CIMLedgerDAO">
+	<select id="selectCIMLedger" resultType="com.platfos.pongift.data.cim.model.CIMLedger">
+		SELECT *
+		FROM cim_ledger_list_tb
+		WHERE ledger_id = #{ledgerId}
+	</select>
+	<select id="selectCIMLedgerByGiftNo" resultType="com.platfos.pongift.data.cim.model.CIMLedger">
+		SELECT *
+		FROM cim_ledger_list_tb
+		WHERE gift_no = #{giftNo}
+	</select>
+	<select id="selectCIMLedgerByAES256GiftNo" resultType="com.platfos.pongift.data.cim.model.CIMLedger">
+		SELECT *
+		FROM cim_ledger_list_tb
+		WHERE gift_no_aes256 = #{giftNo}
+	</select>
+	<select id="selectCIMLedgerByTradeList" resultType="com.platfos.pongift.data.cim.model.CIMLedger">
+		SELECT ledger.*
+		FROM pom_trade_list_tb trade
+			INNER JOIN pom_trade_gift_tb gift
+			ON trade.trade_id = gift.trade_id
+			INNER JOIN cim_ledger_list_tb ledger
+			ON gift.ledger_id = ledger.ledger_id
+		WHERE trade.trade_tp = #{tradeTp}
+			AND trade.order_no = #{orderNo}
+			AND trade.service_id = #{serviceId}
+	</select>
+	<select id="selectCIMLedgerListByTradeTpAndOrderNoAndDetailNo" resultType="com.platfos.pongift.data.cim.model.CIMLedger">
+		SELECT ledger.*
+		FROM pom_trade_list_tb trade
+		INNER JOIN pom_trade_gift_tb gift
+		ON trade.trade_id = gift.trade_id
+		INNER JOIN cim_ledger_list_tb ledger
+		ON gift.ledger_id = ledger.ledger_id
+		WHERE trade.trade_tp = #{tradeTp}
+		AND trade.order_no = #{orderNo}
+		<choose>
+			<when test = "detailNo != null">
+		AND trade.detail_no = #{detailNo}
+			</when>
+			<otherwise>
+		AND trade.detail_no is null
+			</otherwise>
+		</choose>
+	</select>
+	<select id="selectCIMLedgerListByTradeId" resultType="com.platfos.pongift.data.cim.model.CIMLedger">
+		SELECT ledger.*
+		FROM pom_trade_list_tb trade
+		INNER JOIN pom_trade_gift_tb gift
+		ON trade.trade_id = gift.trade_id
+		INNER JOIN cim_ledger_list_tb ledger
+		ON gift.ledger_id = ledger.ledger_id
+		WHERE trade.trade_id = #{tradeId}
+	</select>
+	<select id="selectCIMLedgerExpiredNotice" resultType="com.platfos.pongift.data.cim.model.CIMLedger">
+		SELECT *
+		FROM cim_ledger_list_tb ledger
+		INNER JOIN (
+		SELECT
+			 numbers.n send_cnt
+			, CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(system_nm, ',', numbers.n), ',', -1) AS UNSIGNED) remain_day
+			, DATE_FORMAT(DATE_ADD(NOW(), INTERVAL CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(system_nm, ',', numbers.n), ',', -1) AS UNSIGNED) DAY), '%Y%m%d') expired_notice_day
+		FROM (
+		SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10) numbers
+		INNER JOIN sim_system_info_tb system
+		ON system.apply_key='gift.notice.expired'
+		AND numbers.n &lt;= ((LENGTH(system_nm) - LENGTH(REPLACE(system_nm,',',''))) + 1)
+		) expired
+		ON ledger.expiry_dt = expired.expired_notice_day
+		AND ledger.gift_st = '01'
+	</select>
+	<insert id="insertCIMLedger" parameterType="com.platfos.pongift.data.cim.model.CIMLedger">
+		INSERT INTO cim_ledger_list_tb
+		(
+			ledger_id, service_id, gift_no, gift_no_aes256, gift_amt, bare_no, expiry_dt, gift_st, reg_date
+	    ) VALUES (
+	    	#{ledgerId}, #{serviceId}, #{giftNo}, #{giftNoAes256}, #{giftAmt}, #{bareNo}, DATE_FORMAT(DATE_ADD(NOW(), INTERVAL #{expiryDay} DAY),'%Y%m%d'), #{giftSt}, now()
+	    )
+	</insert>
+	<insert id="insertCIMLedgerHis" parameterType="com.platfos.pongift.data.cim.model.CIMLedgerHis">
+		INSERT INTO cim_ledger_his_tb
+		(
+			modify_id, ledger_id, modify_tp, expiry_dt, gift_st, reg_date
+	    ) VALUES (
+	    	#{modifyId}, #{ledgerId}, #{modifyTp}, #{expiryDt}, #{giftSt}, now()
+	    )
+	</insert>
+	<update id="updateCIMLedger">
+		UPDATE cim_ledger_list_tb
+		SET mod_date = now()
+			<if test="giftNo != null"> , gift_no = #{giftNo}</if>
+			<if test="bareNo != null"> , bare_no = #{bareNo}</if>
+			<if test="expiryDt != null"> , expiry_dt = #{expiryDt}</if>
+			<if test="giftSt != null"> , gift_st = #{giftSt}</if>
+		WHERE ledger_id = #{ledgerId}
+	</update>
+</mapper>

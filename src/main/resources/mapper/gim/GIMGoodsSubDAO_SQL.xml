@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.gim.dao.GIMGoodsSubDAO">
+	<select id="selectGIMGoodsSub" resultType="com.platfos.pongift.data.gim.model.GIMGoodsSub">
+		SELECT *
+		FROM gim_goods_sub_tb
+		WHERE option_id = #{optionId}
+	</select>
+
+	<select id="selectGIMGoodsSubListByGoodsId" resultType="com.platfos.pongift.data.gim.model.GIMGoodsSub">
+		SELECT *
+		FROM gim_goods_sub_tb
+		WHERE goods_id = #{goodsId}
+	</select>
+
+	<insert id="insertGIMGoodsSub" parameterType="com.platfos.pongift.data.gim.model.GIMGoodsSub">
+		INSERT INTO gim_goods_sub_tb
+		(
+			option_id, goods_id
+		   , option_nm, option_desc
+		   , price_tp, option_price
+		   , stock_cnt
+		   , reg_date
+	    ) VALUES (
+	    	#{optionId}, #{goodsId}
+	    	, #{optionNm}, #{optionDesc}
+	    	, #{priceTp}, #{optionPrice}
+	    	, #{stockCnt}
+	    	, now()
+	    )
+	</insert>
+
+	<update id="updateGIMGoodsSub" parameterType="com.platfos.pongift.data.gim.model.GIMGoodsSub">
+		UPDATE gim_goods_sub_tb
+		SET goods_id = #{goodsId}, option_nm = #{optionNm}, option_desc = #{optionDesc}
+		  , price_tp = #{priceTp}, option_price = #{optionPrice}, stock_cnt = #{stockCnt}
+		  , mod_date = now()
+		WHERE option_id = #{optionId}
+	</update>
+
+	<delete id="deleteGIMGoodsSub">
+		DELETE FROM gim_goods_sub_tb
+		WHERE option_id = #{optionId}
+	</delete>
+
+	<delete id="deleteGIMGoodsSubByGoodsId">
+		DELETE FROM gim_goods_sub_tb
+		WHERE goods_id = #{goodsId}
+	</delete>
+</mapper>

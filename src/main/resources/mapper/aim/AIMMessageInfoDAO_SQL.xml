@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.aim.dao.AIMMessageInfoDAO">
+	<select id="selectAIMMessageInfoList" resultType="com.platfos.pongift.data.aim.model.AIMMessageInfo">
+		SELECT language_id, scope_gb, apply_key, language_gb, message_nm, reg_date, reg_id, mod_date, mod_id
+		FROM aim_message_info_tb
+	</select>
+	<select id="selectAIMMessageInfoListByScopeGb" resultType="com.platfos.pongift.data.aim.model.AIMMessageInfo">
+		SELECT language_id, scope_gb, apply_key, language_gb, message_nm, reg_date, reg_id, mod_date, mod_id
+		FROM aim_message_info_tb
+		WHERE scope_gb=#{scope_gb}
+	</select>
+	<select id="selectAIMMessageInfoListByApplyKey" resultType="com.platfos.pongift.data.aim.model.AIMMessageInfo">
+		SELECT language_id, scope_gb, apply_key, language_gb, message_nm, reg_date, reg_id, mod_date, mod_id
+		FROM aim_message_info_tb
+		WHERE apply_key=#{apply_key}
+	</select>
+	<select id="selectApplyKeyList" resultType="string">
+		SELECT apply_key
+		FROM aim_message_info_tb
+		GROUP BY apply_key
+	</select>
+	<select id="selectLanguageGbList" resultType="string">
+		SELECT language_gb
+		FROM aim_message_info_tb
+		GROUP BY language_gb
+	</select>
+</mapper>

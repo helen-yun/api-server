@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMAttachFileDAO">
+	<select id="selectSIMAttachFileListByLinkedId" resultType="com.platfos.pongift.data.sim.model.SIMCode">
+		SELECT attach_id, maintain_gb, linked_id, file_gb, file_path, store_nm, origin_nm, file_kind, reg_date, reg_id, mod_date, mod_id
+		FROM sim_attach_file_tb
+		WHERE linked_id = #{linkedId}
+	</select>
+	<select id="selectSIMAttachFileByMaintainGbAndFileGbAndLinkedId" resultType="com.platfos.pongift.data.sim.model.SIMAttachFile">
+		SELECT attach_id, maintain_gb, linked_id, file_gb, file_path, store_nm, origin_nm, file_kind, reg_date, reg_id, mod_date, mod_id
+		FROM sim_attach_file_tb
+		WHERE maintain_gb = #{maintainGb}
+		AND file_gb = #{fileGb}
+		AND linked_id = #{linkedId}
+	</select>
+	<insert id="insertSIMAttachFile" parameterType="com.platfos.pongift.data.sim.model.SIMAttachFile">
+		INSERT INTO sim_attach_file_tb
+		(
+			attach_id, maintain_gb, linked_id, file_gb
+			, file_path, store_nm, origin_nm, file_kind
+			, reg_date
+	    ) VALUES (
+	    	#{attachId}, #{maintainGb}, #{linkedId}, #{fileGb}
+	    	, #{filePath}, #{storeNm}, #{originNm}, #{fileKind}
+	    	, now()
+	    )
+	</insert>
+
+	<update id="updateSIMAttachFile" parameterType="com.platfos.pongift.data.sim.model.SIMAttachFile">
+		UPDATE sim_attach_file_tb
+		SET maintain_gb = #{maintainGb}, linked_id = #{linkedId}, file_gb = #{fileGb}
+		  , file_path = #{filePath}, store_nm = #{storeNm}, origin_nm = #{originNm}, file_kind = #{fileKind}
+		  , mod_date = now()
+		WHERE attach_id = #{attachId}
+	</update>
+
+	<delete id="deleteSIMAttachFile">
+		DELETE FROM sim_attach_file_tb WHERE attach_id = #{attachId}
+	</delete>
+</mapper>

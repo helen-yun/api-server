@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMPolicyInfoDAO">
+	<select id="selectSIMPolicyInfo" resultType="com.platfos.pongift.data.sim.model.SIMPolicyInfo">
+		SELECT *
+		FROM sim_policy_info_tb
+		LIMIT 1
+	</select>
+	<select id="selectDateLessThan" resultType="com.platfos.pongift.data.sim.model.SIMPolicyInfo">
+		SELECT ${column} as 'value', (NOW() &lt; DATE_ADD(STR_TO_DATE(#{value}, #{format}), INTERVAL ${column} ${unit})) result
+		FROM sim_policy_info_tb
+		LIMIT 1
+	</select>
+	<select id="selectDateLessThanOrEqual" resultType="com.platfos.pongift.data.sim.model.SIMPolicyInfo">
+		SELECT ${column} as 'value', (NOW() &lt;= DATE_ADD(STR_TO_DATE(#{value}, #{format}), INTERVAL ${column} ${unit})) result
+		FROM sim_policy_info_tb
+		LIMIT 1
+	</select>
+</mapper>

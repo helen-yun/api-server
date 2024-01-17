@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.gim.dao.GIMGoodsDAO">
+	<select id="selectGIMGoods" resultType="com.platfos.pongift.data.gim.model.GIMGoods">
+		SELECT *
+		FROM gim_goods_list_tb
+		WHERE goods_id = #{goodsId}
+	</select>
+	<select id="selectGIMGoodsByExhibitSt" resultType="com.platfos.pongift.data.gim.model.GIMGoods">
+		SELECT *
+		FROM gim_goods_list_tb goods
+		ORDER BY goods.reg_date DESC
+	</select>
+	<select id="existGIMGoodsByExhibitSt" resultType="boolean">
+		SELECT IF(COUNT(goods.goods_id)>0, true, false) AS exist
+		FROM gim_goods_list_tb goods
+		INNER JOIN msm_store_list_tb store
+		ON goods.store_id = store.store_id
+		INNER JOIN mim_service_list_tb service
+		ON store.service_id = service.service_id
+		AND service.agency_fl='Y'
+		AND service.agency_id=#{agencyId}
+		WHERE goods.exhibit_st = #{exhibitSt}
+	</select>
+	<insert id="insertGIMGoods" parameterType="com.platfos.pongift.data.gim.model.GIMGoods">
+		INSERT INTO gim_goods_list_tb
+		(
+			goods_id, service_id, store_id
+		   , goods_category, giftcard_tp, goods_nm
+		   , stock_cnt, goods_option, option_cnt, sort_order
+		   , retail_price, sale_price, supply_price
+		   , tax_fl, approval_st, approval_dt, exhibit_st, exchange_place
+		   , goods_info, caution_point, limit_point, expiry_gb, process_st
+		   , reg_date, mod_date
+	    ) VALUES (
+	    	#{goodsId}, #{serviceId}, #{storeId}
+	    	, #{goodsCategory}, #{giftcardTp}, #{goodsNm}
+	    	, #{stockCnt}, #{goodsOption}, #{optionCnt}, #{sortOrder}
+	    	, #{retailPrice}, #{salePrice}, #{supplyPrice}
+	    	, #{taxFl}, '01', DATE_FORMAT(NOW(), '%Y%m%d'), '01', #{exchangePlace}
+	    	, #{goodsInfo}, #{cautionPoint}, #{limitPoint}, #{expiryGb}, '01'
+	    	, now(), now()
+	    )
+	</insert>
+
+	<update id="updateGIMGoods" parameterType="com.platfos.pongift.data.gim.model.GIMGoods">
+		UPDATE gim_goods_list_tb
+		SET goods_category = #{goodsCategory}, goods_nm = #{goodsNm}
+		  , stock_cnt = #{stockCnt}, goods_option = #{goodsOption}, option_cnt = #{optionCnt}, sort_order = #{sortOrder}
+		  , retail_price = #{retailPrice}, sale_price = #{salePrice}, supply_price = #{supplyPrice}
+		  , tax_fl = #{taxFl}, approval_st = '01', exchange_place = #{exchangePlace}
+		  , goods_info = #{goodsInfo}, caution_point = #{cautionPoint}, limit_point = #{limitPoint}, expiry_gb=#{expiryGb}, process_st = '02'
+		  , mod_date = now()
+		WHERE goods_id = #{goodsId}
+	</update>
+
+	<update id="updateGIMGoodsExhibitSt">
+		UPDATE gim_goods_list_tb
+		SET exhibit_st = #{exhibitSt}
+			, process_st = '01'
+		  	, mod_date = now()
+		WHERE goods_id = #{goodsId}
+	</update>
+
+	<update id="updateGIMGoodsProcessSt">
+		UPDATE gim_goods_list_tb
+		SET process_st = #{processSt}
+		  	, mod_date = now()
+		WHERE goods_id = #{goodsId}
+	</update>
+
+	<delete id="deleteGIMGoods">
+		DELETE FROM gim_goods_list_tb
+		WHERE goods_id = #{goodsId}
+	</delete>
+    
+    <update id="updateGIMGoodsStock">
+        UPDATE gim_channel_info_tb
+        SET stock_cnt = stock_cnt + #{orderCnt}
+        WHERE channel_gb = #{channelGb}
+          AND goods_id = #{goodsId}
+    </update>
+
+	<update id="updateGIMGoodsStockAndSoldOut">
+		UPDATE gim_goods_list_tb
+		SET stock_cnt = 0, exhibit_st = '03'
+		WHERE goods_id = #{goodsId}
+	</update>
+
+	<update id="updateGIMGoodsMarketStock">
+		UPDATE gim_channel_info_tb
+		SET stock_cnt = 0
+		WHERE channel_gb = #{channelGb}
+		  AND goods_id = #{goodsId}
+	</update>
+    
+    <select id="selectGIMGoodsChannel" resultType="com.platfos.pongift.goods.model.GoodsChannel">
+        SELECT route_id
+             , goods_id
+             , channel_gb
+             , channel_id
+             , stock_cnt
+             , exhibit_end
+             , exhibit_st
+             , reg_date
+             , reg_id
+             , mod_date
+             , mod_id
+        FROM gim_channel_info_tb
+        WHERE channel_gb = #{channelGb}
+          AND goods_id = #{goodsId}
+    </select>
+</mapper>

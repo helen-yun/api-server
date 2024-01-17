@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.gim.dao.GIMChannelInfoDAO">
+	<select id="selectGIMChannelInfo" resultType="com.platfos.pongift.data.gim.model.GIMChannelInfo">
+		SELECT gchannel.*, dchannel.code_nm channel_nm
+		FROM gim_channel_info_tb gchannel
+		INNER JOIN sim_code_sub_tb dchannel
+		ON gchannel.channel_gb = dchannel.code_cd
+		AND dchannel.group_id = 'GF200301000057'
+		WHERE route_id = #{routeId}
+		<if test="useFl != null">
+			AND use_fl=#{useFl}
+		</if>
+	</select>
+
+	<select id="selectGIMChannelInfoByGoodsIdAndChannelGb" resultType="com.platfos.pongift.data.gim.model.GIMChannelInfo">
+		SELECT gchannel.*, dchannel.code_nm channel_nm
+		FROM gim_channel_info_tb gchannel
+		INNER JOIN sim_code_sub_tb dchannel
+		ON gchannel.channel_gb = dchannel.code_cd
+		AND dchannel.group_id = 'GF200301000057'
+		WHERE goods_id = #{goodsId}
+		AND channel_gb = #{channelGb}
+		<if test="useFl != null">
+			AND use_fl=#{useFl}
+		</if>
+	</select>
+
+	<select id="selectGIMChannelInfoListByGoodsId" resultType="com.platfos.pongift.data.gim.model.GIMChannelInfo">
+		SELECT gchannel.*, dchannel.code_nm channel_nm
+		FROM gim_channel_info_tb gchannel
+		INNER JOIN sim_code_sub_tb dchannel
+		ON gchannel.channel_gb = dchannel.code_cd
+		AND dchannel.group_id = 'GF200301000057'
+		WHERE goods_id = #{goodsId}
+		<if test="useFl != null">
+			AND use_fl=#{useFl}
+		</if>
+	</select>
+
+	<select id="selectGIMChannelInfoByChannelIdAndChannelGb" resultType="com.platfos.pongift.data.gim.model.GIMChannelInfo">
+		SELECT gchannel.*, dchannel.code_nm channel_nm
+		FROM gim_channel_info_tb gchannel
+		INNER JOIN sim_code_sub_tb dchannel
+		ON gchannel.channel_gb = dchannel.code_cd
+		AND dchannel.group_id = 'GF200301000057'
+		WHERE channel_id = #{channelId}
+		AND channel_gb = #{channelGb}
+		<if test="useFl != null">
+			AND use_fl=#{useFl}
+		</if>
+	</select>
+
+	<select id="selectGIMChannelInfoExpirationExhibitEnd" resultType="com.platfos.pongift.data.gim.model.GIMChannelInfo">
+		SELECT gchannel.*, dchannel.code_nm channel_nm
+		FROM gim_channel_info_tb gchannel
+		JOIN sim_system_info_tb system
+		ON DATEDIFF(STR_TO_DATE(exhibit_end, '%Y%m%d'), NOW()) &lt;= cast(system.system_nm as signed)
+		AND system.apply_key = 'goods.day.check.exhibit.expiration'
+		INNER JOIN sim_code_sub_tb dchannel
+		ON gchannel.channel_gb = dchannel.code_cd
+		AND dchannel.group_id = 'GF200301000057'
+		WHERE gchannel.channel_id IS NOT NULL
+	</select>
+
+	<insert id="insertGIMChannelInfo" parameterType="com.platfos.pongift.data.gim.model.GIMChannelInfo">
+		INSERT INTO gim_channel_info_tb
+		(
+			route_id
+			, goods_id
+		    , channel_gb
+		    , stock_cnt
+		    , use_fl
+		    , reg_date
+		<if test="channelId != null">
+			, channel_id
+		</if>
+	    ) VALUES (
+	    	#{routeId}
+	    	, #{goodsId}
+	    	, #{channelGb}
+	    	, #{stockCnt}
+	    	, 'Y'
+	    	, now()
+		<if test="channelId != null">
+			, #{channelId}
+		</if>
+	    )
+	</insert>
+
+	<update id="updateGIMChannelInfoExhibit" parameterType="com.platfos.pongift.data.gim.model.GIMChannelInfo">
+		UPDATE gim_channel_info_tb
+		SET exhibit_end = #{exhibitEnd}
+		  , exhibit_st = #{exhibitSt}
+		  , mod_date = now()
+		WHERE goods_id = #{goodsId}
+		AND channel_gb = #{channelGb}
+	</update>
+
+	<update id="updateGIMChannelInfoChannelId" parameterType="com.platfos.pongift.data.gim.model.GIMChannelInfo">
+		UPDATE gim_channel_info_tb
+		SET channel_id = #{channelId}
+		  , mod_date = now()
+		WHERE goods_id = #{goodsId}
+		AND channel_gb = #{channelGb}
+	</update>
+
+	<update id="updateGIMChannelInfoUseFl" parameterType="com.platfos.pongift.data.gim.model.GIMChannelInfo">
+		UPDATE gim_channel_info_tb
+		SET use_fl = #{useFl}
+		  , mod_date = now()
+		WHERE goods_id = #{goodsId}
+		AND channel_gb = #{channelGb}
+	</update>
+
+	<delete id="deleteGIMChannelInfo">
+		DELETE FROM gim_channel_info_tb
+		WHERE route_id = #{routeId}
+	</delete>
+
+	<delete id="deleteGIMChannelInfoByGoodsId">
+		DELETE FROM gim_channel_info_tb
+		WHERE goods_id = #{goodsId}
+	</delete>
+
+	<delete id="deleteGIMChannelInfoByGoodsIdAndChannelGb">
+		DELETE FROM gim_channel_info_tb
+		WHERE goods_id = #{goodsId}
+		AND channel_gb = #{channelGb}
+	</delete>
+</mapper>

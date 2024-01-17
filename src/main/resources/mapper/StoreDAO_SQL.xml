@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.store.dao.StoreDAO">
+	<sql id="select_store">
+			     service.merchant_id, service.business_gb , service.country_gb, service.nation_cd, service.service_nm
+			   , service.service_tp, service.service_gb, service.category_tp , service.service_form, service.service_form2
+			   , service.adjust_fl, service.service_url, service.application_nm , service.app_store, service.agency_fl, service.agency_id
+			   , service.service_st, service.tax_tp, service.sales_gb , service.center_tel, service.center_tm
+			   , (SELECT store_id FROM msm_store_list_tb WHERE service_id=o.service_id LIMIT 1) owned_id
+			   , service.save_st, service.apply_dt , service.aligner_id, service.service_st
+			   , store.*
+			   , CASE WHEN file1.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file1.file_path, file1.store_nm) END store_image1
+			   , CASE WHEN file2.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file2.file_path, file2.store_nm) END store_image2
+			   , CASE WHEN file3.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file3.file_path, file3.store_nm) END store_image3
+	</sql>
+	<sql id="from_store">
+		FROM msm_store_list_tb store
+		JOIN sim_system_info_tb cdn
+		ON cdn.access_fl=#{accessFl}
+		AND cdn.apply_key='cdn.server.host'
+		JOIN mim_service_list_tb service
+		ON store.service_id = service.service_id
+		LEFT OUTER JOIN sim_attach_file_tb file1
+		ON store.store_id = file1.linked_id
+		AND file1.maintain_gb = '02'
+		AND file1.file_gb = '01'
+		LEFT OUTER JOIN sim_attach_file_tb file2
+		ON store.store_id = file2.linked_id
+		AND file2.maintain_gb = '02'
+		AND file2.file_gb = '02'
+		LEFT OUTER JOIN sim_attach_file_tb file3
+		ON store.store_id = file3.linked_id
+		AND file3.maintain_gb = '02'
+		AND file3.file_gb = '03'
+		LEFT OUTER JOIN mim_service_list_tb o
+		ON service.owned_id = o.service_id
+	</sql>
+
+	<select id="selectStoreListByAgencyId" resultType="com.platfos.pongift.store.model.Store">
+		SELECT
+		<include refid="select_store"/>
+		<include refid="from_store"/>
+		WHERE service.agency_id = #{agencyId}
+	</select>
+	<select id="selectOwnerStoreListByAgencyId" resultType="com.platfos.pongift.store.model.Store">
+		SELECT
+		<include refid="select_store"/>
+		<include refid="from_store"/>
+		WHERE service.agency_id = #{agencyId}
+		AND service.owned_id is null
+	</select>
+	<select id="selectStoreListByAgencyIdAndOwnedId" resultType="com.platfos.pongift.store.model.Store">
+		SELECT
+		<include refid="select_store"/>
+		<include refid="from_store"/>
+		WHERE service.agency_id = #{agencyId}
+		AND service.owned_id = #{ownedId}
+	</select>
+	<select id="selectStore" resultType="com.platfos.pongift.store.model.Store">
+		SELECT
+		<include refid="select_store"/>
+		<include refid="from_store"/>
+		<choose>
+			<when test="agencyId != null">
+				WHERE service.agency_id = #{agencyId}
+				AND store.store_id = #{storeId}
+			</when>
+			<otherwise>
+				WHERE store.store_id = #{storeId}
+			</otherwise>
+		</choose>
+		LIMIT 1;
+	</select>
+	<select id="selectStoreByGoodsId" resultType="com.platfos.pongift.store.model.Store">
+		SELECT *
+		FROM msm_store_list_tb store
+		INNER JOIN gim_goods_list_tb goods
+		ON goods.store_id = store.store_id
+		WHERE goods.goods_id = #{goodsId}
+		LIMIT 1;
+	</select>
+</mapper>

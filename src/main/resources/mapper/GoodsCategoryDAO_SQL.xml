@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.category.dao.GoodsCategoryDAO">
+	<sql id="goods_category">
+		SELECT
+			exhibit.goods_category
+			, CONCAT(category.major_group, category.middle_group, category.minor_group, category.detail_group) goods_category_cd
+			, (IF(major.code_nm IS NULL, 0, 1)+IF(middle.code_nm IS NULL, 0, 1)+IF(minor.code_nm IS NULL, 0, 1)+IF(detail.code_nm IS NULL, 0, 1)) level
+			, CONCAT(
+				  IF(major.code_nm  IS NULL, '', major.code_nm)
+				, IF(middle.code_nm IS NULL, '', CONCAT('>',middle.code_nm))
+				, IF(minor.code_nm  IS NULL, '', CONCAT('>',minor.code_nm ))
+				, IF(detail.code_nm IS NULL, '', CONCAT('>',detail.code_nm))) goods_category_nm
+		FROM gim_exhibit_info_tb exhibit
+		INNER JOIN sim_code_sub_tb category
+		ON exhibit.goods_category = category.code_id
+		<if test="codeSt != null">
+		AND category.code_st=#{codeSt}
+		</if>
+		LEFT OUTER JOIN sim_code_sub_tb major
+		ON category.major_group = major.code_cd
+		AND major.group_id='GF200301000111'
+		<if test="codeSt != null">
+		AND major.code_st=#{codeSt}
+		</if>
+		LEFT OUTER JOIN sim_code_sub_tb middle
+		ON category.middle_group = middle.code_cd
+		AND category.major_group = middle.major_group
+		AND middle.group_id='GF200301000112'
+		<if test="codeSt != null">
+		AND middle.code_st=#{codeSt}
+		</if>
+		LEFT OUTER JOIN sim_code_sub_tb minor
+		ON category.minor_group = minor.code_cd
+		AND category.major_group = minor.major_group
+		AND category.middle_group = minor.middle_group
+		AND minor.group_id='GF200301000113'
+		<if test="codeSt != null">
+		AND minor.code_st=#{codeSt}
+		</if>
+		LEFT OUTER JOIN sim_code_sub_tb detail
+		ON category.detail_group = detail.code_cd
+		AND category.major_group = detail.major_group
+		AND category.middle_group = detail.middle_group
+		AND category.minor_group = detail.minor_group
+		AND detail.group_id='GF200301000114'
+		<if test="codeSt != null">
+		AND detail.code_st=#{codeSt}
+		</if>
+	</sql>
+
+	<select id="selectGoodsCategoryList" resultType="com.platfos.pongift.category.model.GoodsCategory">
+		<include refid="goods_category"/>
+		GROUP BY exhibit.goods_category
+		ORDER BY goods_category_cd
+	</select>
+
+	<select id="selectGoodsCategoryByGoodsCategory" resultType="com.platfos.pongift.category.model.GoodsCategory">
+		<include refid="goods_category"/>
+		WHERE exhibit.goods_category = #{goodsCategory}
+		GROUP BY exhibit.goods_category
+	</select>
+
+	<select id="selectGoodsCategoryByGoodsCategoryCd" resultType="com.platfos.pongift.category.model.GoodsCategory">
+		<include refid="goods_category"/>
+		WHERE CONCAT(category.major_group, category.middle_group, category.minor_group, category.detail_group) = #{goodsCategoryCd}
+		GROUP BY exhibit.goods_category
+	</select>
+
+	<select id="selectGoodsCategoryChannelList" resultType="com.platfos.pongift.category.model.GoodsCategoryChannel">
+		SELECT
+			exhibit.exhibit_id
+			, exhibit.channel_gb
+			, dchannel.code_nm channel_nm
+			, exhibit.channel_category
+			, exhibit.category_nm channel_category_nm
+			, exhibit.reg_date
+			, exhibit.mod_date
+		FROM gim_exhibit_info_tb exhibit
+		INNER JOIN sim_code_sub_tb dchannel
+		ON exhibit.channel_gb = dchannel.code_cd
+		AND dchannel.group_id = 'GF200301000057'
+		<if test="codeSt != null">
+		AND dchannel.code_st=#{codeSt}
+		</if>
+		WHERE exhibit.goods_category=#{goodsCategory}
+		ORDER BY channel_gb
+	</select>
+
+	<select id="selectChannelGbList" resultType="string">
+		SELECT exhibit.channel_gb
+		FROM gim_exhibit_info_tb exhibit
+		INNER JOIN sim_code_sub_tb dchannel
+		ON exhibit.channel_gb = dchannel.code_cd
+		AND dchannel.group_id = 'GF200301000057'
+		<if test="codeSt != null">
+		AND dchannel.code_st=#{codeSt}
+		</if>
+		INNER JOIN sim_code_sub_tb category
+		ON exhibit.goods_category = category.code_id
+		<if test="codeSt != null">
+		AND category.code_st=#{codeSt}
+		</if>
+		WHERE CONCAT(category.major_group, category.middle_group, category.minor_group, category.detail_group) = #{goodsCategoryCd}
+	</select>
+
+	<select id="selectGoodsCategoryCompriseWithoutExhibit" resultType="com.platfos.pongift.category.model.GoodsCategory">
+		SELECT
+		category.code_id goods_category
+		, CONCAT(category.major_group, category.middle_group, category.minor_group, category.detail_group) goods_category_cd
+		, (IF(major.code_nm IS NULL, 0, 1)+IF(middle.code_nm IS NULL, 0, 1)+IF(minor.code_nm IS NULL, 0, 1)+IF(detail.code_nm IS NULL, 0, 1)) level
+		, CONCAT(
+		IF(major.code_nm  IS NULL, '', major.code_nm)
+		, IF(middle.code_nm IS NULL, '', CONCAT('>',middle.code_nm))
+		, IF(minor.code_nm  IS NULL, '', CONCAT('>',minor.code_nm ))
+		, IF(detail.code_nm IS NULL, '', CONCAT('>',detail.code_nm))) goods_category_nm
+		FROM sim_code_sub_tb category
+		LEFT OUTER JOIN sim_code_sub_tb major
+		ON category.major_group = major.code_cd
+		AND major.group_id='GF200301000111'
+		LEFT OUTER JOIN sim_code_sub_tb middle
+		ON category.middle_group = middle.code_cd
+		AND category.major_group = middle.major_group
+		AND middle.group_id='GF200301000112'
+		LEFT OUTER JOIN sim_code_sub_tb minor
+		ON category.minor_group = minor.code_cd
+		AND category.major_group = minor.major_group
+		AND category.middle_group = minor.middle_group
+		AND minor.group_id='GF200301000113'
+		LEFT OUTER JOIN sim_code_sub_tb detail
+		ON category.detail_group = detail.code_cd
+		AND category.major_group = detail.major_group
+		AND category.middle_group = detail.middle_group
+		AND category.minor_group = detail.minor_group
+		AND detail.group_id='GF200301000114'
+		WHERE category.code_id = #{goodsCategory}
+		ORDER BY goods_category_cd
+	</select>
+</mapper>

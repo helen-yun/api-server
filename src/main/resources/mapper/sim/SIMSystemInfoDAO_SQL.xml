@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMSystemInfoDAO">
+	<select id="selectSIMSystemInfoList" resultType="com.platfos.pongift.data.sim.model.SIMSystemInfo">
+		SELECT *
+		FROM sim_system_info_tb
+	</select>
+	<select id="existGateway" resultType="boolean">
+		SELECT (COUNT(gateway_id) &gt; 0) exist
+		FROM sim_system_gw_tb
+		WHERE access_fl = #{accessFl}
+		AND channel_gb = #{channelGb}
+		AND gateway_url = #{gatewayUrl}
+		AND method_tp = #{methodTp}
+		AND use_fl = 'Y'
+	</select>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.mim.dao.MIMServiceDAO">
+	<select id="selectMIMService" resultType="com.platfos.pongift.data.mim.model.MIMService">
+		SELECT *
+		FROM mim_service_list_tb
+		WHERE service_id = #{serviceId}
+	</select>
+	<select id="selectMIMServiceListByAgencyId" resultType="com.platfos.pongift.data.mim.model.MIMService">
+		SELECT *
+		FROM mim_service_list_tb
+		WHERE agency_id = #{agencyId}
+	</select>
+	<select id="selectMIMServiceListByChannelGb" resultType="com.platfos.pongift.data.mim.model.MIMService">
+		SELECT service.*
+		FROM mim_channel_list_tb dchannel
+		INNER JOIN mim_service_list_tb service
+		ON dchannel.service_id = service.service_id
+		WHERE channel_gb = #{channelGb}
+		LIMIT 1
+	</select>
+	<select id="selectChannelGbByServiceId" resultType="string">
+		SELECT channel_gb
+		FROM mim_channel_list_tb
+		WHERE service_id = #{serviceId}
+		LIMIT 1
+	</select>
+
+	<insert id="insertMIMService" parameterType="com.platfos.pongift.data.mim.model.MIMService">
+		INSERT INTO mim_service_list_tb
+		(
+			service_id, merchant_id, business_gb , country_gb, nation_cd, service_nm
+		   , service_tp, service_gb, category_tp , service_form, service_form2
+		   , adjust_fl, service_url, application_nm , app_store, agency_fl, agency_id
+		   , service_st, tax_tp, sales_gb , center_tel, center_tm
+		   , owned_id, save_st, apply_dt , aligner_id
+		   , reg_date
+	    ) VALUES (
+	    	#{serviceId}, #{merchantId}, #{businessGb} , #{countryGb}, #{nationCd}, #{serviceNm}
+	    	, #{serviceTp}, #{serviceGb}, #{categoryTp} , #{serviceForm}, #{serviceForm2}
+	    	, #{adjustFl}, #{serviceUrl}, #{applicationNm} , #{appStore}, #{agencyFl}, #{agencyId}
+	    	, '02', #{taxTp}, #{salesGb} , #{centerTel}, #{centerTm}
+	    	, #{ownedId}, #{saveSt}, DATE_FORMAT(NOW(), '%Y%m%d') , #{alignerId}
+	    	, now()
+	    )
+	</insert>
+
+	<update id="updateMIMService" parameterType="com.platfos.pongift.data.mim.model.MIMService">
+		UPDATE mim_service_list_tb
+		SET country_gb = #{countryGb}, nation_cd = #{nationCd}, service_nm = #{serviceNm}
+		  , service_gb = #{serviceGb}, category_tp = #{categoryTp}, service_form = #{serviceForm}, service_form2 = #{serviceForm2}
+		  , service_url = #{serviceUrl}, application_nm = #{applicationNm}, app_store = #{appStore}
+		  , center_tel = #{centerTel}, center_tm = #{centerTm}
+		  , owned_id = #{ownedId}
+		  , mod_date = now()
+		WHERE service_id = #{serviceId}
+	</update>
+
+	<update id="updateMIMServiceSt">
+		UPDATE mim_service_list_tb
+		SET service_st = #{serviceSt}
+		  , mod_date = now()
+		WHERE service_id = #{serviceId}
+	</update>
+</mapper>

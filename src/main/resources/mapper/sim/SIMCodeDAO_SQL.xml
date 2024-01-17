@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMCodeDAO">
+	<sql id="select_code">
+			     a.*, b.group_nm
+	</sql>
+	<select id="selectSIMCodeByCodeId" resultType="com.platfos.pongift.data.sim.model.SIMCode">
+		SELECT <include refid="select_code"/>
+		FROM sim_code_sub_tb a, sim_code_list_tb b
+		WHERE a.group_id = b.group_id
+		AND a.code_st = 'Y'
+		AND a.code_id = #{codeId}
+	</select>
+	<select id="selectSIMCodeByGroupIdAndCodeCd" resultType="com.platfos.pongift.data.sim.model.SIMCode">
+		SELECT <include refid="select_code"/>
+		FROM sim_code_sub_tb a, sim_code_list_tb b
+		WHERE a.group_id = b.group_id
+		AND a.code_st = 'Y'
+		AND a.group_id = #{groupId}
+		AND a.code_cd = #{codeCd}
+	</select>
+	<select id="selectSIMCodeByGroupIdAndCodeNm" resultType="com.platfos.pongift.data.sim.model.SIMCode">
+		SELECT <include refid="select_code"/>
+		FROM sim_code_sub_tb a, sim_code_list_tb b
+		WHERE a.group_id = b.group_id
+		AND a.code_st = 'Y'
+		AND a.group_id = #{groupId}
+		AND a.code_nm = #{codeNm}
+	</select>
+	<select id="selectSIMCodeList" resultType="com.platfos.pongift.data.sim.model.SIMCode">
+		SELECT <include refid="select_code"/>
+		FROM sim_code_sub_tb a, sim_code_list_tb b
+		WHERE a.group_id = b.group_id
+		AND a.code_st = 'Y'
+	</select>
+	<select id="selectSIMCodeListByGroupId" resultType="com.platfos.pongift.data.sim.model.SIMCode">
+		SELECT <include refid="select_code"/>
+		FROM sim_code_sub_tb a, sim_code_list_tb b
+		WHERE a.group_id = b.group_id
+		AND a.code_st = 'Y'
+		AND a.group_id = #{groupId}
+	</select>
+	<select id="selectSIMCodeListByGroupIdAndCodeCds" resultType="com.platfos.pongift.data.sim.model.SIMCode">
+		SELECT <include refid="select_code"/>
+		FROM sim_code_sub_tb a, sim_code_list_tb b
+		WHERE a.group_id = b.group_id
+		AND a.code_st = 'Y'
+		AND a.group_id = #{groupId}
+		<foreach collection="codeCds" item="codeCd" index="index"  separator=", " open="AND a.code_cd IN ( " close=" )">
+			#{codeCd}
+		</foreach>
+	</select>
+	<select id="selectSIMCodeListByGoodsCategoryCd" resultType="com.platfos.pongift.data.sim.model.SIMCode">
+		SELECT <include refid="select_code"/>
+		FROM sim_code_sub_tb a, sim_code_list_tb b
+		WHERE a.group_id = b.group_id
+		AND a.code_st = 'Y'
+		AND a.group_id IN ('GF200301000111', 'GF200301000112', 'GF200301000113', 'GF200301000114')
+		AND CONCAT(a.major_group, a.middle_group, a.minor_group, a.detail_group) = #{goodsCategoryCd}
+		LIMIT 1
+	</select>
+</mapper>

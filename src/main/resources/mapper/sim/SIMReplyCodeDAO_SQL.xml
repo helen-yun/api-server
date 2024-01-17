@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMReplyCodeDAO">
+	<select id="selectSIMReplyCodeList" resultType="com.platfos.pongift.data.sim.model.SIMReplyCode">
+		SELECT reply_id, api_gb, reply_cd, reply_nm, code_st, apply_key, reg_date, reg_id, mod_date, mod_id
+		FROM sim_reply_code_tb
+		WHERE api_gb = #{api_gb}
+		AND code_st = 'Y'
+		ORDER BY reply_cd
+	</select>
+
+	<select id="selectSIMReplyCodeByApplyKey" resultType="com.platfos.pongift.data.sim.model.SIMReplyCode">
+		SELECT reply_id, api_gb, reply_cd, reply_nm, code_st, apply_key, reg_date, reg_id, mod_date, mod_id
+		FROM sim_reply_code_tb
+		WHERE api_gb = #{api_gb}
+		AND code_st = 'Y'
+		AND apply_key = #{apply_key}
+		ORDER BY reply_id LIMIT 1
+	</select>
+	<select id="selectApplyKeyList" resultType="string">
+		SELECT apply_key
+		FROM sim_reply_code_tb
+		WHERE api_gb = #{api_gb}
+		AND code_st = 'Y'
+		GROUP BY apply_key
+	</select>
+</mapper>

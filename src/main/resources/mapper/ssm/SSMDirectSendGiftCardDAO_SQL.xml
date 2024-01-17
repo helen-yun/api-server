@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.ssm.dao.SSMDirectSendGiftCardDAO">
+    <select id="selectSendInfoList" parameterType="com.platfos.pongift.data.ssm.model.SSMSendInfo" resultType="com.platfos.pongift.data.ssm.model.SSMSendInfo">
+        SELECT send.send_id
+             , send.goods_id
+             , send.receiver_nm
+             , send.receiver_phone
+             , goods.goods_nm
+             , goods.expiry_gb
+             , goods.giftcard_tp
+             , goods.sale_price
+             , goods.sale_price AS retailPrice
+             , goods.goods_info
+             , goods.exchange_place
+             , goods.service_id
+             , CASE WHEN file1.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file1.file_path, file1.store_nm) END goods_image
+             , CASE WHEN file2.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file2.file_path, file2.store_nm) END goods_detail_image
+             , svc.service_nm
+             , svc.center_tel
+             , (SELECT COUNT(past_id) FROM ssm_send_his_tb WHERE send_id = send.send_id AND result_cd = '100') AS resendCnt
+        FROM ssm_send_list_tb send
+            JOIN ssm_goods_info_tb goods ON send.goods_id = goods.goods_id
+            JOIN mim_service_list_tb svc ON goods.service_id = svc.service_id
+            JOIN sim_system_info_tb cdn ON cdn.access_fl = #{accessFl} AND cdn.apply_key='cdn.server.host'
+            LEFT OUTER JOIN sim_attach_file_tb file1 ON goods.goods_id = file1.linked_id AND file1.maintain_gb = '01' AND file1.file_gb = '01'
+            LEFT OUTER JOIN sim_attach_file_tb file2 ON goods.goods_id = file2.linked_id AND file2.maintain_gb = '01' AND file2.file_gb = '02'
+            LEFT OUTER JOIN sim_attach_file_tb file3 ON goods.goods_id = file3.linked_id AND file3.maintain_gb = '01' AND file3.file_gb = '03'
+            LEFT OUTER JOIN sim_attach_file_tb file4 ON goods.goods_id = file4.linked_id AND file4.maintain_gb = '01' AND file4.file_gb = '04'
+        WHERE 1 = 1
+        <if test="sendId !=null and sendId !=''">
+            AND send.send_id = #{sendId}
+        </if>
+        <if test="groupNo gt 0">
+            AND send.group_no = #{groupNo}
+        </if>
+    </select>
+
+    <select id="selectGoodsSendInfoList" parameterType="com.platfos.pongift.data.ssm.model.SSMSendInfo" resultType="com.platfos.pongift.data.ssm.model.SSMSendInfo">
+        SELECT send.send_id
+        , send.goods_id
+        , send.receiver_nm
+        , send.receiver_phone
+        , goods.goods_nm
+        , goods.expiry_gb
+        , goods.giftcard_tp
+        , goods.retail_price
+        , goods.sale_price
+        , goods.goods_info
+        , goods.exchange_place
+        , goods.service_id
+        , CASE WHEN file1.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file1.file_path, file1.store_nm) END goods_image
+        , CASE WHEN file2.file_path IS NULL THEN NULL ELSE CONCAT(cdn.system_nm, file2.file_path, file2.store_nm) END goods_detail_image
+        , svc.service_nm
+        , svc.center_tel
+        , (SELECT COUNT(past_id) FROM ssm_send_his_tb WHERE send_id = send.send_id AND result_cd = '100') AS resendCnt
+        FROM ssm_send_list_tb send
+        JOIN gim_goods_list_tb goods ON send.goods_id = goods.goods_id
+        JOIN mim_service_list_tb svc ON goods.service_id = svc.service_id
+        JOIN sim_system_info_tb cdn ON cdn.access_fl = #{accessFl} AND cdn.apply_key='cdn.server.host'
+        LEFT OUTER JOIN sim_attach_file_tb file1 ON goods.goods_id = file1.linked_id AND file1.maintain_gb = '01' AND file1.file_gb = '01'
+        LEFT OUTER JOIN sim_attach_file_tb file2 ON goods.goods_id = file2.linked_id AND file2.maintain_gb = '01' AND file2.file_gb = '02'
+        LEFT OUTER JOIN sim_attach_file_tb file3 ON goods.goods_id = file3.linked_id AND file3.maintain_gb = '01' AND file3.file_gb = '03'
+        LEFT OUTER JOIN sim_attach_file_tb file4 ON goods.goods_id = file4.linked_id AND file4.maintain_gb = '01' AND file4.file_gb = '04'
+        WHERE 1 = 1
+        <if test="sendId !=null and sendId !=''">
+            AND send.send_id = #{sendId}
+        </if>
+        <if test="groupNo gt 0">
+            AND send.group_no = #{groupNo}
+        </if>
+    </select>
+
+    <select id="selectSendGoodsByGoodsId" resultType="com.platfos.pongift.data.ssm.model.SSMSendInfo">
+        SELECT
+             goods.goods_id
+             , goods.goods_nm
+             , goods.expiry_gb
+             , goods.giftcard_tp
+             , goods.retail_price
+             , goods.sale_price
+             , goods.goods_info
+             , goods.exchange_place
+             , goods.service_id
+             , CASE
+                   WHEN file1.file_path IS NULL THEN NULL
+                   ELSE CONCAT(cdn.system_nm, file1.file_path, file1.store_nm) END goods_image
+             , CASE
+                   WHEN file2.file_path IS NULL THEN NULL
+                   ELSE CONCAT(cdn.system_nm, file2.file_path, file2.store_nm) END goods_detail_image
+             , svc.service_nm
+             , svc.center_tel
+        FROM gim_goods_list_tb goods
+                 JOIN mim_service_list_tb svc ON goods.service_id = svc.service_id
+                 JOIN sim_system_info_tb cdn ON cdn.access_fl = #{accessFl} AND cdn.apply_key = 'cdn.server.host'
+                 LEFT OUTER JOIN sim_attach_file_tb file1
+                                 ON goods.goods_id = file1.linked_id AND file1.maintain_gb = '01' AND
+                                    file1.file_gb = '01'
+                 LEFT OUTER JOIN sim_attach_file_tb file2
+                                 ON goods.goods_id = file2.linked_id AND file2.maintain_gb = '01' AND
+                                    file2.file_gb = '02'
+                 LEFT OUTER JOIN sim_attach_file_tb file3
+                                 ON goods.goods_id = file3.linked_id AND file3.maintain_gb = '01' AND
+                                    file3.file_gb = '03'
+                 LEFT OUTER JOIN sim_attach_file_tb file4
+                                 ON goods.goods_id = file4.linked_id AND file4.maintain_gb = '01' AND
+                                    file4.file_gb = '04'
+        WHERE goods.goods_id = #{goodsId}
+    </select>
+    
+    <insert id="insertGiftCardSendHistory" parameterType="com.platfos.pongift.data.ssm.model.SSMSendHistory">
+        INSERT INTO ssm_send_his_tb (past_id, send_id, send_gb, request_cd, result_cd, reg_date)
+        VALUES (
+                #{pastId}
+                , #{sendId}
+                , #{sendGb}
+                , #{requestCd}
+                , #{resultCd}
+                , NOW()
+               )
+    </insert>
+    
+    <insert id="insertGiftCardExpiryHistory" parameterType="com.platfos.pongift.data.ssm.model.SSMGiftCardHistory">
+        INSERT INTO ssm_giftcard_his_tb (change_id, send_id, expiry_dt, reg_date)
+        VALUES (
+               #{changeId}
+               , #{sendId}
+               , #{expiryDt}
+               , NOW()
+               )
+    </insert>
+    
+    <update id="updateGiftCardNo" parameterType="com.platfos.pongift.data.ssm.model.SSMSendInfo">
+        UPDATE ssm_send_list_tb 
+        SET giftcard_no = #{giftcardNo}
+          , mod_date = NOW()
+        WHERE send_id = #{sendId}
+    </update>
+    
+    <select id="selectGiftCardHistoryList" parameterType="string" resultType="com.platfos.pongift.data.ssm.model.SSMGiftCardHistory">
+        SELECT gift.*
+             , sends.receiver_phone
+             , sends.reg_date
+             , goods.goods_nm
+             , goods.sale_price
+        FROM ssm_giftcard_his_tb gift
+                 LEFT JOIN ssm_send_list_tb sends ON sends.send_id = gift.send_id
+                 LEFT JOIN ssm_goods_info_tb goods ON sends.goods_id = goods.goods_id
+        WHERE gift.send_id = #{sendId}
+    </select>
+</mapper>

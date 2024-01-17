@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.gim.dao.GIMGoodsControlDAO">
+	<select id="selectBeforeProcessGIMGoodsControl" resultType="com.platfos.pongift.data.gim.model.GIMGoodsControl">
+		SELECT *
+		FROM gim_goods_control_tb
+		WHERE process_st = '01'
+		ORDER BY control_id
+		LIMIT 1
+	</select>
+
+	<select id="selectGIMGoodsControlList" resultType="com.platfos.pongift.data.gim.model.GIMGoodsControl">
+		SELECT *
+		FROM gim_goods_control_tb
+		WHERE goods_id = #{goodsId}
+		AND process_st = #{processSt}
+	</select>
+
+	<select id="selectGIMGoodsControlListByGroupIdAndProcessSts" resultType="com.platfos.pongift.data.gim.model.GIMGoodsControl">
+		SELECT *
+		FROM gim_goods_control_tb
+		WHERE goods_id = #{goodsId}
+		<foreach collection="processSts" item="processSt" index="index"  separator=", " open="AND process_st IN ( " close=" )">
+			#{processSt}
+		</foreach>
+	</select>
+
+	<insert id="insertGIMGoodsControl" parameterType="com.platfos.pongift.data.gim.model.GIMGoodsControl">
+		INSERT INTO gim_goods_control_tb
+		(
+			control_id, goods_id, channel_gb
+		   , process_st, execute_cnt
+		   , reg_date
+	    ) VALUES (
+	    	#{controlId}, #{goodsId}, #{channelGb}
+	    	, '01', 0
+	    	, now()
+	    )
+	</insert>
+
+	<insert id="insertGIMGoodsControlHis">
+		INSERT INTO gim_control_his_tb (record_id, goods_id, channel_gb, process_st, execute_cnt, reg_date)
+		SELECT #{recordId}, goods_id, channel_gb, process_st, execute_cnt, now()
+		FROM gim_goods_control_tb
+		WHERE control_id = #{controlId}
+	</insert>
+
+	<update id="updateGIMGoodsControlProcessSt">
+		UPDATE gim_goods_control_tb
+		SET process_st = #{processSt}
+		<if test="!processSt.equals('02')">
+			, execute_cnt = execute_cnt+1
+		</if>
+		  , mod_date = now()
+		WHERE control_id = #{controlId}
+	</update>
+
+	<update id="updateGIMGoodsControlExecuteCnt">
+		UPDATE gim_goods_control_tb
+		SET execute_cnt = #{executeCnt}
+		  , mod_date = now()
+		WHERE control_id = #{controlId}
+	</update>
+
+	<delete id="deleteGIMGoodsControl">
+		DELETE FROM gim_goods_control_tb
+		WHERE control_id = #{controlId}
+	</delete>
+
+	<select id="selectGoodsIdForScheduler" resultType="string">
+		SELECT goods_id
+		FROM gim_goods_control_tb
+		WHERE process_st = '01'
+		ORDER BY reg_date
+		LIMIT 1
+	</select>
+	<!-- 상품 정보 반영 스케쥴 리스트업  -->
+	<select id="selectGIMGoodsControlForScheduler" resultType="com.platfos.pongift.data.gim.model.GIMGoodsControl">
+		SELECT ctrl.*
+		FROM gim_goods_control_tb ctrl
+		WHERE ctrl.process_st = '01'
+		AND ctrl.goods_id = #{goodsId}
+		ORDER BY ctrl.reg_date, ctrl.goods_id, ctrl.channel_gb
+	</select>
+
+	<!-- 상품 정보 반영 작업 상태 업데이트 -->
+	<update id="updateGIMGoodsControlProcessStForScheduler">
+		UPDATE gim_goods_control_tb
+		SET process_st = #{processSt}
+		<if test="!processSt.equals('02')">
+			, execute_cnt = execute_cnt+1
+		</if>
+		WHERE goods_id = #{goodsId}
+		AND process_st = '01' /* 대기 상태 */
+	</update>
+
+	<!-- 상품 정보 반영 작업 상태 이력 저장 -->
+	<insert id="insertGIMGoodsControlHisForScheduler">
+		INSERT INTO gim_control_his_tb (record_id, goods_id, channel_gb, process_st, execute_cnt, reg_date)
+		SELECT CONCAT('CH',SUBSTRING(sysdate()+0, 3, 6), lpad(sim_seq_reg01_fc('CH'), 6, 0)), goods_id, channel_gb, process_st, execute_cnt, now()
+		FROM gim_goods_control_tb
+		WHERE goods_id = #{goodsId}
+		AND channel_gb = #{channelGb}
+		AND process_st = #{processSt}
+	</insert>
+</mapper>

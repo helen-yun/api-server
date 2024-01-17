@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+		 updateCheck="false" monitoring="autodetect" dynamicConfig="true">
+	<!-- 임시저장 경로를 설정 -->
+	<diskStore path="java.io.tmpdir" />
+	<!--
+		Cache에 저장할 레퍼런스의 최대값을 100000으로 지정,
+		maxDepthExceededBehavior = "continue" :  초과 된 최대 깊이에 대해 경고하지만 크기가 조정 된 요소를 계속 탐색
+		maxDepthExceededBehavior = "abort" : 순회를 중지하고 부분적으로 계산 된 크기를 즉시 반환
+	-->
+	<sizeOfPolicy maxDepth="100000" maxDepthExceededBehavior="continue"/>
+
+	<!-- Default Cache -->
+	<defaultCache
+			eternal="false"
+			timeToIdleSeconds="0"
+			timeToLiveSeconds="1200"
+			overflowToDisk="false"
+			diskPersistent="false"
+			diskExpiryThreadIntervalSeconds="120"
+			memoryStoreEvictionPolicy="LRU"
+	/>
+
+	<!-- Custom Cache -->
+	<!-- API 사용 권한 여부 캐시 : 1분 -->
+	<cache name="SIMConnectInfoCache"
+		   maxElementsInMemory="1000"
+		   timeToLiveSeconds="60"
+		   eternal="false"
+		   overflowToDisk="false"
+		   diskPersistent="false"
+		   memoryStoreEvictionPolicy="LRU"
+	/>
+	<!-- 메시지 캐시 : 1일 -->
+	<cache name="AIMMessageInfoListCache"
+		   maxElementsInMemory="300"
+		   timeToLiveSeconds="86400"
+		   eternal="false"
+		   overflowToDisk="false"
+		   diskPersistent="false"
+		   memoryStoreEvictionPolicy="LRU"
+	/>
+	<!-- API 응답코드 캐시 : 1일 -->
+	<cache name="SIMReplyCodeCache"
+		   maxElementsInMemory="100"
+		   timeToLiveSeconds="86400"
+		   eternal="false"
+		   overflowToDisk="false"
+		   diskPersistent="false"
+		   memoryStoreEvictionPolicy="LRU"
+	/>
+	<!-- 기본키 컬럼 캐시 : 5분 -->
+	<cache name="colCache"
+		   maxElementsInMemory="200"
+		   timeToLiveSeconds="300"
+		   eternal="false"
+		   overflowToDisk="false"
+		   diskPersistent="false"
+		   memoryStoreEvictionPolicy="LRU"
+	/>
+	<!-- 공통 코드 리스트 캐시 : 1일 -->
+	<cache name="SIMCodeListCache"
+		   maxElementsInMemory="2000"
+		   timeToLiveSeconds="86400"
+		   eternal="false"
+		   overflowToDisk="false"
+		   diskPersistent="false"
+		   memoryStoreEvictionPolicy="LRU"
+	/>
+	<!-- 시스템 정보 캐시 : 1일 -->
+	<cache name="SIMSystemInfoCache"
+		   maxElementsInMemory="100"
+		   timeToLiveSeconds="86400"
+		   eternal="false"
+		   overflowToDisk="false"
+		   diskPersistent="false"
+		   memoryStoreEvictionPolicy="LRU"
+	/>
+</ehcache>

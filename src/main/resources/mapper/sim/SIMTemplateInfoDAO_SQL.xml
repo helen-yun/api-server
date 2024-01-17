@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.platfos.pongift.data.sim.dao.SIMTemplateInfoDAO">
+	<select id="selectSIMTemplateInfo" resultType="com.platfos.pongift.data.sim.model.SIMTemplateInfo">
+		SELECT *
+		FROM sim_template_info_tb
+		WHERE template_id = #{templateId}
+		AND use_st = 'Y'
+	</select>
+	<select id="selectSIMTemplateInfoByFormTp" resultType="com.platfos.pongift.data.sim.model.SIMTemplateInfo">
+		SELECT *
+		FROM sim_template_info_tb
+		WHERE form_tp = #{formTp}
+		AND use_st = 'Y'
+		LIMIT 1
+	</select>
+</mapper>
